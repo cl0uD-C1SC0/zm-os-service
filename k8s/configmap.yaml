@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: os-service-cfg
+  namespace: zm
+data:
+  # REST síncrono para o catálogo (Service "catalog-service" do cluster)
+  CATALOG_SERVICE_URL: "http://catalog-service:8000"
