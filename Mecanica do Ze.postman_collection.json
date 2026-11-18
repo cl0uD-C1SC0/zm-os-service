@@ -1,0 +1,708 @@
+{
+	"info": {
+		"_postman_id": "62cd3912-5dfd-43b1-aca7-5f7440a4da76",
+		"name": "Mecanica do Ze",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19253290",
+		"_collection_link": "https://docking-module-geoscientist-23055011-s-team.postman.co/workspace/P%25C3%25B3s-Gradua%25C3%25A7%25C3%25A3o-FIAP---Collection~9d1806d4-e505-43ec-95b6-a77cb08dbca8/collection/19253290-62cd3912-5dfd-43b1-aca7-5f7440a4da76?action=share&source=collection_link&creator=19253290"
+	},
+	"item": [
+		{
+			"name": "Health Checks",
+			"item": [
+				{
+					"name": "OS Health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{os}}/health/ready",
+							"host": [
+								"{{os}}"
+							],
+							"path": [
+								"health",
+								"ready"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Catalog Health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{cat}}/health/ready",
+							"host": [
+								"{{cat}}"
+							],
+							"path": [
+								"health",
+								"ready"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Billing Health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{bil}}/health/ready",
+							"host": [
+								"{{bil}}"
+							],
+							"path": [
+								"health",
+								"ready"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Execution Health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{exe}}/health/ready",
+							"host": [
+								"{{exe}}"
+							],
+							"path": [
+								"health",
+								"ready"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Catalogo",
+			"item": [
+				{
+					"name": "Adicionar Peca",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"nome\": \"Filtro de Oleo\", \"preco\": 45.9, \"quantidade\": 50}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{cat}}/peca/adicionar_peca",
+							"host": [
+								"{{cat}}"
+							],
+							"path": [
+								"peca",
+								"adicionar_peca"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cliente e veiculo",
+			"item": [
+				{
+					"name": "Novo Cliente",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"nome\": \"Joao\", \"cpf\": \"{{cpf}}\", \"endereco\": \"Rua X\", \"telefone\": \"11999999999\", \"email\": \"joao@teste.com\" }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{os}}/cliente/novo_cliente",
+							"host": [
+								"{{os}}"
+							],
+							"path": [
+								"cliente",
+								"novo_cliente"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cadastrar Veiculo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"placa\", \"T\" + Date.now().toString().slice(-6));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"modelo\": \"Fit\", \"marca\": \"Honda\", \"placa\": \"{{placa}}\", \"ano\": \"2014\", \"cliente_id\": {{cliente_id}} }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{os}}/veiculo/cadastrar_veiculo",
+							"host": [
+								"{{os}}"
+							],
+							"path": [
+								"veiculo",
+								"cadastrar_veiculo"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "OS e Saga (Caminho Feliz)",
+			"item": [
+				{
+					"name": "Abrir OS",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const m = pm.response.text().match(/ID: (\\d+)/);",
+									"pm.collectionVariables.set(\"os_id\", m[1]);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"cliente_cpf\": {{cpf}}, \"veiculo_placa\": \"{{placa}}\" }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{os}}/ordem_servico/nova_os",
+							"host": [
+								"{{os}}"
+							],
+							"path": [
+								"ordem_servico",
+								"nova_os"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Adicionar Peca",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{os}}/ordem_servico/{{os_id}}/adicionar_peca/1?quantidade=2",
+							"host": [
+								"{{os}}"
+							],
+							"path": [
+								"ordem_servico",
+								"{{os_id}}",
+								"adicionar_peca",
+								"1"
+							],
+							"query": [
+								{
+									"key": "quantidade",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Avancar OS",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{os}}/ordem_servico/avancar/{{os_id}}",
+							"host": [
+								"{{os}}"
+							],
+							"path": [
+								"ordem_servico",
+								"avancar",
+								"{{os_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar Orcamento",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 2000);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Orçamento gerado\", () => pm.expect(pm.response.json().status).to.eql(\"Aguardando Aprovação\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{bil}}/orcamento/{{os_id}}",
+							"host": [
+								"{{bil}}"
+							],
+							"path": [
+								"orcamento",
+								"{{os_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pagar Ocarmento",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{bil}}/orcamento/{{os_id}}/confirmar_aprovacao?cliente_cpf={{cpf}}",
+							"host": [
+								"{{bil}}"
+							],
+							"path": [
+								"orcamento",
+								"{{os_id}}",
+								"confirmar_aprovacao"
+							],
+							"query": [
+								{
+									"key": "cliente_cpf",
+									"value": "{{cpf}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar OS",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 3000);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"OS em execução\", () => pm.expect(pm.response.json().status).to.eql(\"Em Execução\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{os}}/ordem_servico/consultar/{{os_id}}",
+							"host": [
+								"{{os}}"
+							],
+							"path": [
+								"ordem_servico",
+								"consultar",
+								"{{os_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar fila de Execucao",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"OS na fila\", () => pm.expect(pm.response.json().status).to.eql(\"Na Fila\"));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{exe}}/execucao/{{os_id}}",
+							"host": [
+								"{{exe}}"
+							],
+							"path": [
+								"execucao",
+								"{{os_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Avancar Execucao",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{exe}}/execucao/{{os_id}}/avancar",
+							"host": [
+								"{{exe}}"
+							],
+							"path": [
+								"execucao",
+								"{{os_id}}",
+								"avancar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Historico da OS",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{os}}/ordem_servico/historico/{{os_id}}",
+							"host": [
+								"{{os}}"
+							],
+							"path": [
+								"ordem_servico",
+								"historico",
+								"{{os_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Fluxo de Estorno completo",
+			"item": [
+				{
+					"name": "Cliente aprova & paga",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{bil}}/orcamento/{{os_id}}/confirmar_aprovacao?cliente_cpf={{cpf}}",
+							"host": [
+								"{{bil}}"
+							],
+							"path": [
+								"orcamento",
+								"{{os_id}}",
+								"confirmar_aprovacao"
+							],
+							"query": [
+								{
+									"key": "cliente_cpf",
+									"value": "{{cpf}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OS Em execucao",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{os}}/ordem_servico/consultar/{{os_id}}",
+							"host": [
+								"{{os}}"
+							],
+							"path": [
+								"ordem_servico",
+								"consultar",
+								"{{os_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mecanico falha",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{exe}}/execucao/{{os_id}}/falhar?motivo=peca%20incompativel",
+							"host": [
+								"{{exe}}"
+							],
+							"path": [
+								"execucao",
+								"{{os_id}}",
+								"falhar"
+							],
+							"query": [
+								{
+									"key": "motivo",
+									"value": "peca%20incompativel"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Billing: estornado",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{bil}}/orcamento/{{os_id}}",
+							"host": [
+								"{{bil}}"
+							],
+							"path": [
+								"orcamento",
+								"{{os_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OS: cancelada",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{os}}/ordem_servico/consultar/{{os_id}}",
+							"host": [
+								"{{os}}"
+							],
+							"path": [
+								"ordem_servico",
+								"consultar",
+								"{{os_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Estoque Devolvido",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{cat}}/peca/consultar_peca/1",
+							"host": [
+								"{{cat}}"
+							],
+							"path": [
+								"peca",
+								"consultar_peca",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Historico da OS",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{os}}/ordem_servico/historico/{{os_id}}",
+							"host": [
+								"{{os}}"
+							],
+							"path": [
+								"ordem_servico",
+								"historico",
+								"{{os_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "ip",
+			"value": ""
+		},
+		{
+			"key": "os",
+			"value": ""
+		},
+		{
+			"key": "cat",
+			"value": ""
+		},
+		{
+			"key": "bil",
+			"value": ""
+		},
+		{
+			"key": "exe",
+			"value": ""
+		},
+		{
+			"key": "cpf",
+			"value": ""
+		},
+		{
+			"key": "client_id",
+			"value": ""
+		},
+		{
+			"key": "placa",
+			"value": ""
+		},
+		{
+			"key": "os_id",
+			"value": ""
+		}
+	]
+}
