@@ -1,6 +1,7 @@
 # CI/CD do microsserviço (mesmo arquivo nos 4 repositórios: tudo vem do nome do repo).
 #
 #   test   (ubuntu-latest)        pytest + cobertura (falha se < 80%)
+#   sonar  (ubuntu-latest)        SonarCloud + Quality Gate (usa o coverage.xml do test)
 #   build  (ubuntu-latest)        docker build; push no Docker Hub só na main
 #   deploy (self-hosted, zm-vm)   kubectl apply -f k8s/ no minikube da VM; só na main
 #
@@ -50,9 +51,29 @@ jobs:
           name: coverage
           path: coverage.xml
 
+  sonar:
+    name: Qualidade (SonarCloud)
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # histórico completo: o Sonar usa para "código novo" e autoria
+
+      - name: Baixar relatório de cobertura
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage
+
+      - name: Análise SonarCloud (espera o Quality Gate)
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+
   build:
     name: Build da imagem
-    needs: test
+    needs: sonar
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
