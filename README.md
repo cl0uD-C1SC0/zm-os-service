@@ -149,10 +149,10 @@ Os manifestos deste serviço ficam em [`k8s/`](k8s/), no namespace `zm`:
 | `configmap.yaml` | `CATALOG_SERVICE_URL` |
 | `secret.yaml` | `DATABASE_URL`, `RABBITMQ_URL` |
 
-A infraestrutura compartilhada (namespace `zm`, MySQL, MongoDB, RabbitMQ e Maildev) fica em [`k8s-infra/`](https://github.com/cl0uD-C1SC0/ZeMechanics/tree/feat/microservices/k8s-infra), no repositório principal, e é aplicada uma vez:
+A infraestrutura compartilhada (namespace `zm`, MySQL, MongoDB, RabbitMQ e Maildev) fica em [`k8s-infra/`](k8s-infra/), neste repositório, e é aplicada uma vez:
 
 ```bash
-kubectl apply -f k8s-infra/   # uma vez (repositório principal)
+kubectl apply -f k8s-infra/   # uma vez (este repositório)
 kubectl apply -f k8s/         # este serviço (o pipeline faz isso sozinho)
 ```
 
