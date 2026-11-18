@@ -82,7 +82,7 @@ A contrapartida é que o os-service conhece o fluxo inteiro, e uma mudança no p
 
 ## Endpoints
 
-Prefixo: `/api/v1` · Swagger: `http://localhost:8000/docs`
+Prefixo: `/api/v1` · Swagger: `http://localhost:8000/docs` (compose) · `http://<minikube-ip>:30080/docs` (Kubernetes)
 
 | Método | Rota | Descrição |
 |---|---|---|
@@ -113,6 +113,10 @@ Prefixo: `/api/v1` · Swagger: `http://localhost:8000/docs`
 | `GET` | `/health/live` | Liveness probe |
 | `GET` | `/health/ready` | Readiness probe (testa o MySQL) |
 
+### Postman
+
+Collection em [`docs/postman/`](docs/postman/), com o fluxo completo da OS passando pelos 4 serviços (catálogo → cliente e veículo → OS → orçamento → aprovação e pagamento → execução → entrega) e a Saga com falha (execução falha → estorno → peças devolvidas → OS cancelada). Para usar, importe no Postman e ajuste a variável `ip` (saída de `minikube ip`).
+
 ## Variáveis de ambiente
 
 | Variável | Exemplo | Descrição |
@@ -123,7 +127,9 @@ Prefixo: `/api/v1` · Swagger: `http://localhost:8000/docs`
 
 ## Como rodar
 
-Com o restante do ambiente, a partir da raiz do projeto: `docker compose up --build -d`.
+### Local (docker compose)
+
+Com o restante do ambiente, a partir da pasta onde fica o `docker-compose.yml`: `docker compose up --build -d`.
 
 Só este serviço:
 
@@ -131,6 +137,40 @@ Só este serviço:
 docker build -t os-service .
 docker run -p 8000:8000 -e DATABASE_URL=... -e CATALOG_SERVICE_URL=... -e RABBITMQ_URL=... os-service
 ```
+
+### Kubernetes
+
+Os manifestos deste serviço ficam em [`k8s/`](k8s/), no namespace `zm`:
+
+| Arquivo | Conteúdo |
+|---|---|
+| `deployment.yaml` | 1 réplica, `initContainer` que espera o MySQL e o RabbitMQ, probes em `/api/v1/health/live` e `/ready`, limites de CPU e memória |
+| `service.yaml` | NodePort `30080` |
+| `configmap.yaml` | `CATALOG_SERVICE_URL` |
+| `secret.yaml` | `DATABASE_URL`, `RABBITMQ_URL` |
+
+A infraestrutura compartilhada (namespace `zm`, MySQL, MongoDB, RabbitMQ e Maildev) fica em [`k8s-infra/`](https://github.com/cl0uD-C1SC0/ZeMechanics/tree/feat/microservices/k8s-infra), no repositório principal, e é aplicada uma vez:
+
+```bash
+kubectl apply -f k8s-infra/   # uma vez (repositório principal)
+kubectl apply -f k8s/         # este serviço (o pipeline faz isso sozinho)
+```
+
+Acesso: `http://$(minikube ip):30080/docs`
+
+## CI/CD
+
+Pipeline próprio em [`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml), independente dos outros serviços. Roda em todo push e PR para a `main`.
+
+| Job | Onde roda | O que faz |
+|---|---|---|
+| `test` | `ubuntu-latest` (GitHub) | `pytest` com cobertura. **Falha se ficar abaixo de 80%** (`--cov-fail-under=80`) e anexa o `coverage.xml` |
+| `build` | `ubuntu-latest` (GitHub) | Build da imagem. Na `main`, publica `jayakuza/zm-os-service:<sha>` e `:latest` no Docker Hub |
+| `deploy` | runner self-hosted (VM com minikube) | Só na `main`: troca a tag do `deployment.yaml` pelo SHA do commit, `kubectl apply -f k8s/` e espera o rollout |
+
+Cada job depende do anterior (`needs`), então uma imagem só chega ao cluster se os testes passarem.
+
+Modelo híbrido: testes e build rodam nos runners do GitHub; só o deploy roda na VM, a única máquina que enxerga o cluster.
 
 ## Testes
 
@@ -147,6 +187,8 @@ DATABASE_URL="sqlite:///./test.db" pytest --cov=app --cov-report=term
   ```
 
 ### Cobertura
+
+Evidência: o relatório sai no log do job **Testes + cobertura** em [Actions](https://github.com/cl0uD-C1SC0/zm-os-service/actions), com o `coverage.xml` anexado como artefato. O pipeline barra qualquer commit abaixo de 80%.
 
 ```
 TOTAL    921 stmts    56 miss    94%
